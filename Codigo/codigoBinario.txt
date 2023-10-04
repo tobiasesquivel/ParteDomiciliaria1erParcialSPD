@@ -1,0 +1,256 @@
+// C++ code
+//
+
+// Funciones
+
+void encenderNumeroCero(void);
+void encenderNumeroUno(void);
+void encenderNumeroDos(void);
+void encenderNumeroTres(void);
+void encenderNumeroCuatro(void);
+void encenderNumeroCinco(void);
+void encenderNumeroSeis(void);
+void encenderNumeroSiete(void);
+void encenderNumeroOcho(void);
+void encenderNumeroNueve(void);
+
+void encenderNumero(int numero);
+void apagarLeds(void);
+// Defines
+
+#define A 10
+#define B 11
+#define C 5
+#define D 6
+#define E 7
+#define F 9
+#define G 8
+
+#define UNIDAD A4
+#define DECENA A5
+
+
+// Variables
+int contador = 0;
+bool fuePresionado = false;
+int botonPresionado;
+int numeroAMostrar = 0;
+
+void setup()
+{
+  pinMode(4, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
+  pinMode(2, INPUT_PULLUP);
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  
+  // Aumentar contador
+  if (digitalRead(3) == LOW && fuePresionado == false){
+    botonPresionado = 3;
+    contador++;
+    fuePresionado = true;
+  }
+  // Fin aumentar contador
+  
+  // Reducir contador
+  if (digitalRead(2) == LOW && fuePresionado == false){
+    botonPresionado = 2;
+    contador--;
+    fuePresionado = true;
+  }
+  // Fin reducir contador
+  
+  // Reiniciar contador
+  if (digitalRead(4) == LOW && fuePresionado == false){
+    botonPresionado = 4;
+    contador = 0;
+    fuePresionado = true;
+  }
+  // Fin reiniciar contador
+  
+  
+
+  
+  // Encender los 7segmentos
+    
+  if (digitalRead(UNIDAD) == LOW)
+  {
+    digitalWrite(DECENA,LOW);
+    digitalWrite(UNIDAD,HIGH);  
+  }
+  else 
+  {
+    digitalWrite(DECENA,HIGH);
+    digitalWrite(UNIDAD,LOW);
+  }
+  
+  
+ if (digitalRead(UNIDAD) == LOW)
+ {
+   numeroAMostrar = contador % 10;
+ }
+  else
+  {
+    numeroAMostrar = contador / 10;
+  }
+  encenderNumero(numeroAMostrar);
+  
+  
+  // Controlar rebote
+  if (digitalRead(botonPresionado) == HIGH)
+  {
+    fuePresionado = false;
+  }
+
+  
+  delay(10);
+}
+    
+    
+    
+    
+    
+    
+    
+    
+// Funciones
+
+void encenderNumero(int numero)
+{
+  apagarLeds();
+  switch (numero)
+  {
+    case 0:
+      encenderNumeroCero();
+      break;
+    case 1:
+      encenderNumeroUno();
+      break;
+    case 2:
+      encenderNumeroDos();
+      break;
+    case 3:
+      encenderNumeroTres();
+      break;
+    case 4:
+      encenderNumeroCuatro();
+      break;
+    case 5:
+      encenderNumeroCinco();
+      break;
+    case 6:
+      encenderNumeroSeis();
+      break;
+    case 7:
+      encenderNumeroSiete();
+      break;
+    case 8:
+      encenderNumeroOcho();
+      break;
+    case 9:
+      encenderNumeroNueve();
+      break;
+  }
+}
+
+
+// Numeros individuales
+void encenderNumeroCero(void)
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, HIGH);
+    digitalWrite(F, HIGH);
+}
+void encenderNumeroUno(void)
+{
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+}
+void encenderNumeroDos(void)
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, HIGH);
+  	digitalWrite(G, HIGH);
+}
+void encenderNumeroTres(void)
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(C, HIGH);
+  	digitalWrite(G, HIGH);
+}
+void encenderNumeroCuatro(void)
+{
+	digitalWrite(G, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(F, HIGH);
+}
+void encenderNumeroCinco(void)
+{
+	digitalWrite(G, HIGH);
+    digitalWrite(A, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+  	digitalWrite(F, HIGH);
+}
+void encenderNumeroSeis(void)
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(G, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, HIGH);
+    digitalWrite(F, HIGH);
+}
+void encenderNumeroSiete(void)
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+}
+void encenderNumeroOcho(void)
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(D, HIGH);
+    digitalWrite(E, HIGH);
+    digitalWrite(F, HIGH);
+  	digitalWrite(G, HIGH);
+}
+void encenderNumeroNueve(void)
+{
+	digitalWrite(A, HIGH);
+    digitalWrite(B, HIGH);
+    digitalWrite(C, HIGH);
+    digitalWrite(F, HIGH);
+  	digitalWrite(G, HIGH);
+}
+
+
+// Apagar leds
+
+void apagarLeds(void)
+{
+	digitalWrite(A, LOW);
+    digitalWrite(B, LOW);
+  	digitalWrite(C, LOW);
+    digitalWrite(D, LOW);
+    digitalWrite(E, LOW);
+    digitalWrite(F, LOW);
+  	digitalWrite(G, LOW);
+}
+
+
