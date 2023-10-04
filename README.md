@@ -1,4 +1,4 @@
-# Ejemplo Documentación 
+# Documentacion
 ![Tinkercad](./img/ArduinoTinkercad.jpg)
 
 
@@ -61,6 +61,10 @@ void encenderNumero(int numero)
 
 ## Link al proyecto
 - [proyecto](https://www.tinkercad.com/things/1Br1fVLu0Qv-swanky-bruticus/editel?sharecode=QMg_0cW1Uu3E9RxVkFx9nJz79JENm1NEdw5IkpSSxw8)
+
+## Esquema del proyecto
+- [esquema](./Esquema/esquema.png)
+
 
 
 ## Multiplexación
