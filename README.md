@@ -19,6 +19,7 @@ Esta funcion se encarga de en primer instancia apagar los leds que previamente
 pudieron quedar encendidos en el 7 segmentos actual seguido de 
 el prender de el numero pasado por parametro reflejado visualmente en el 7 segmentos
 
+
 ~~~ C (lenguaje en el que esta escrito)
 void encenderNumero(int numero)
 {
@@ -124,7 +125,7 @@ del numero representado en el 7 segmentos
 Funcionamiento dentro del programa y cuales son las instrucciones proporcionadas:
 
   // Control remoto
-  
+  ~~~ C
   if (IrReceiver.decode()){ // Decodifica la entrada del control remoto y retorna 1 si es correcta
     switch (IrReceiver.decodedIRData.decodedRawData) // Al valor que decodeo el receptor, lo contemplamos para verificar su valor
     {
