@@ -104,3 +104,39 @@ y en caso de que se requiera mostrar la decena, solo se queda con el valor que o
 
 
 
+## investigación -> Objeto: Control remoto
+
+El control remoto es un objeto que nos permite que a travez de sus botones, podamos asignarle 
+a cada uno una funcionalidad en particular para afectar a nuestro arduino
+
+La integracion del mismo en el proyecto es la de que a travez de sus botones 1 y 2, suba y baje el contador
+del numero representado en el 7 segmentos
+
+  Control remoto: Descripcion del componente
+
+  El mismo para funcionar tiene un receptor el cual es el que nos permite recibir las ondas
+  de frecuencia proporcionadas por el control remoto.
+
+  A travez de la funcion "IrReceiver.begin(PIN_REMOTO, DISABLE_LED_FEEDBACK); " en el 
+  apartado de setup, podremos inicializar el mismo en nuestro arduino.
+
+
+Funcionamiento dentro del programa y cuales son las instrucciones proporcionadas:
+
+  // Control remoto
+  
+  if (IrReceiver.decode()){ // Decodifica la entrada del control remoto y retorna 1 si es correcta
+    switch (IrReceiver.decodedIRData.decodedRawData) // Al valor que decodeo el receptor, lo contemplamos para verificar su valor
+    {
+      case 0xEF10BF00: // En caso de que sea el equivalente al retorno que seria la representacion del boton 1
+      mostrarPrimos ? indiceNumeroPrimo++ : numeroEnteroActual++; // Aumenta el contador del numero respectivo
+      	break;
+      case 0xEE11BF00:// En caso de que sea el equivalente al retorno que seria la representacion del boton 2
+      mostrarPrimos ? indiceNumeroPrimo-- : numeroEnteroActual--; // Reduce el contador del numero respectivo
+      	break;
+      
+    }
+      control.resume();
+    
+  }
+  // Fin control remoto

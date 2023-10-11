@@ -1,5 +1,6 @@
-// C++ code
-//
+#include <stdio.h>
+#include <stdlib.h>
+#include <IRremote.h>
 
 // Funciones
 
@@ -16,6 +17,10 @@ void encenderNumeroNueve(void);
 
 void encenderNumero(int numero);
 void apagarLeds(void);
+
+int contarNumerosPrimos(int maximo);
+int* obtenerNumerosPrimos(int maximo, int *arraySize);
+
 // Defines
 
 #define A 10
@@ -29,30 +34,75 @@ void apagarLeds(void);
 #define UNIDAD A4
 #define DECENA A5
 
+#define SWITCH 12
+
+#define PIN_REMOTO 3 
+#define BOTON_UNO 18615
+#define BOTON_DOS 34935
+
+#define PIN_SENSOR A0
 
 // Variables
-int contador = 0;
 bool fuePresionado = false;
 int botonPresionado;
 int numeroAMostrar = 0;
 
+// Variables primos
+bool primosContados = false;
+int indiceNumeroPrimo = 0;
+int primosSize = 0;
+int *numerosPrimos;
+int numeroPrimoAMostrar = 0;
+bool mostrarPrimos = false;
+
+// Variables enteros
+
+int numeroEnteroActual = 0;
+
+// Variables control remoto
+
+IRrecv control(PIN_REMOTO);
+
+// Variables sensor temperatura
+
+float temperaturaNueva = 0;
+float temperaturaFinal = 0;
+
 void setup()
 {
+  Serial.begin(9600);
   pinMode(4, INPUT_PULLUP);
-  pinMode(3, INPUT_PULLUP);
   pinMode(2, INPUT_PULLUP);
   pinMode(A4, OUTPUT);
   pinMode(A5, OUTPUT);
-  Serial.begin(9600);
+  pinMode(SWITCH, INPUT);
+  
+  IrReceiver.begin(PIN_REMOTO, DISABLE_LED_FEEDBACK); 
 }
 
 void loop()
 {
+  temperaturaNueva = (map(analogRead(PIN_SENSOR),0, 1023, -50,450))+1;
+  // Seteo de array con numeros primos
+  if (primosContados == false)
+  {
+    primosSize = contarNumerosPrimos(99);
+    numerosPrimos = obtenerNumerosPrimos(99,&primosSize);
+    primosContados = true;
+  }
+  // Fin seteo de array con numeros primos
+
+  // Detectar modo Switch
   
+  digitalRead(SWITCH) == LOW ? mostrarPrimos = true : mostrarPrimos = false;
+  
+  // Fin detectar modo Switch
+  
+    
   // Aumentar contador
-  if (digitalRead(3) == LOW && fuePresionado == false){
-    botonPresionado = 3;
-    contador++;
+  if (digitalRead(4) == LOW && fuePresionado == false){
+    botonPresionado = 4;
+    mostrarPrimos ? indiceNumeroPrimo++ : numeroEnteroActual++;
     fuePresionado = true;
   }
   // Fin aumentar contador
@@ -60,23 +110,43 @@ void loop()
   // Reducir contador
   if (digitalRead(2) == LOW && fuePresionado == false){
     botonPresionado = 2;
-    contador--;
+    mostrarPrimos ? indiceNumeroPrimo-- : numeroEnteroActual--;
     fuePresionado = true;
   }
   // Fin reducir contador
   
-  // Reiniciar contador
-  if (digitalRead(4) == LOW && fuePresionado == false){
-    botonPresionado = 4;
-    contador = 0;
-    fuePresionado = true;
-  }
-  // Fin reiniciar contador
+  // Control remoto
   
+  if (IrReceiver.decode()){
+    switch (IrReceiver.decodedIRData.decodedRawData)
+    {
+      case 0xEF10BF00:
+      mostrarPrimos ? indiceNumeroPrimo++ : numeroEnteroActual++;
+      	break;
+      case 0xEE11BF00:
+      mostrarPrimos ? indiceNumeroPrimo-- : numeroEnteroActual--;
+      	break;
+      
+    }
+      control.resume();
+    
+  }
+  // Fin control remoto
+  
+  
+  // Cerrar rango
+  
+  if (numeroEnteroActual > 99 || numeroEnteroActual < 0)
+  {
+    numeroEnteroActual = 0;
+  }
+  if (indiceNumeroPrimo > primosSize - 1 || indiceNumeroPrimo < 0)
+  {
+    indiceNumeroPrimo = 0;
+  }
   
 
-  
-  // Encender los 7segmentos
+  // Cambio de unidades/decenas
     
   if (digitalRead(UNIDAD) == LOW)
   {
@@ -89,16 +159,36 @@ void loop()
     digitalWrite(UNIDAD,LOW);
   }
   
+  // Fin cambio de unidades/decenas
   
+
+  // Calcular primo a mostrar
+  
+  numeroPrimoAMostrar = *(numerosPrimos + indiceNumeroPrimo);
+  
+  // Encender los 7segmentos
  if (digitalRead(UNIDAD) == LOW)
  {
-   numeroAMostrar = contador % 10;
+   if (mostrarPrimos){
+     numeroAMostrar = numeroPrimoAMostrar % 10;
+   }
+   else {
+     numeroAMostrar = numeroEnteroActual % 10;
+   }
+   
  }
   else
   {
-    numeroAMostrar = contador / 10;
+    if (mostrarPrimos){
+     numeroAMostrar = numeroPrimoAMostrar / 10;
+   }
+   else {
+     numeroAMostrar = numeroEnteroActual / 10;
+   }
   }
+  
   encenderNumero(numeroAMostrar);
+  // Fin encender los 7segmentos
   
   
   // Controlar rebote
@@ -106,18 +196,19 @@ void loop()
   {
     fuePresionado = false;
   }
-
   
+  // Fin control rebote
+
+  // Mostrar temperatura
+  if (temperaturaNueva != temperaturaFinal){
+    temperaturaFinal = temperaturaNueva;
+    Serial.print("La temperatura es de: ");
+    Serial.println(temperaturaFinal);
+  }
+  // Fin mostrar temperatura
   delay(10);
 }
-    
-    
-    
-    
-    
-    
-    
-    
+ 
 // Funciones
 
 void encenderNumero(int numero)
@@ -253,4 +344,54 @@ void apagarLeds(void)
   	digitalWrite(G, LOW);
 }
 
+// Numeros primos
+int contarNumerosPrimos(int maximo)
+{
+    int contador = 0;
+    for (int i = 2; i < maximo; i++){
+            bool esPrimo = true;
+            for (int j = 2; j < i; j++)
+            {
+                if (i % j == 0)
+                {
+                    esPrimo = false;
+                    break;
+                }
+            }
+            if(esPrimo)
+            {
+                contador++;
+            }
+        }
+
+    return contador;
+}
+
+int* obtenerNumerosPrimos(int maximo, int *arraySize)
+{
+    int size = contarNumerosPrimos(maximo);
+    int *array = (int*)calloc(size, sizeof(int));
+
+    int arrayIndex = 0;
+    for (int i = 2; i < maximo; i++){
+            bool esPrimo = true;
+            for (int j = 2; j < i; j++)
+            {
+                if (i % j == 0)
+                {
+                    esPrimo = false;
+                    break;
+                }
+            }
+            if(esPrimo)
+            {
+                *(array + arrayIndex) = i;
+                arrayIndex++;
+            }
+        }
+
+    *arraySize = size;
+
+    return array;
+}
 
