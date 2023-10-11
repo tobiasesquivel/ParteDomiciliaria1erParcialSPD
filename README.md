@@ -122,6 +122,7 @@ del numero representado en el 7 segmentos
   apartado de setup, podremos inicializar el mismo en nuestro arduino.
 
 
+
 Funcionamiento dentro del programa y cuales son las instrucciones proporcionadas:
 
   // Control remoto
@@ -140,4 +141,52 @@ Funcionamiento dentro del programa y cuales son las instrucciones proporcionadas
       control.resume();
     
   }
+  ~~~ 
   // Fin control remoto
+
+## investigación -> Objeto: Sensor de luz ambiental
+
+El sensor de luz ambiental es un componente que se puede agregar al arduino y su funcion es
+la de detectar la cantidad de luz que hay en el ambiente.
+
+El mismo tiene 2 patas en las cuales podemos hacer las conexiones. Una es la llamada "collector"
+que es la encargada de estar conectada a la fuente de alimentacion para que tenga voltaje. La otra 
+es la llamada "emitter" que es la que nos permitira, ademas de pasarle la energia que nos 
+transmite GND, vincularla al arduino conectandola en una salida analogica para asi, obtener la 
+informacion que el sensor detecte.
+
+Para aplicarla al proyecto luego de en el setup configurarla como input, debemos llamar a la 
+instruccion "analogRead(PIN_DEL_SENSOR)" para obtener su lectura. Esto nos dara un valor el cual
+deberemos de convertir a un valor real y comprensible por lo que debemos de multiplicar ese 
+valor por "0.0976".
+
+Finalmente tras finalizar esos pasos, obtendremos la cantidad de luz que hay en el ambiente.
+
+
+Implementacion del Sensor de luz ambiental en mi proyecto:
+
+Sobre lo que se encarga el mismo es en controlar el contador cuando se cumplan ciertos casos.
+
+ ~~~ C
+   // Sensor de luz ambiental
+  
+  if (luzNueva > 65 && luzNueva < 90) // En caso que el valor de luz ambiental sea mayor a 65 y menor a 90
+  {
+     mostrarPrimos ? indiceNumeroPrimo-- : numeroEnteroActual--; // Reducir el contador
+  }
+  else if(luzNueva > 90) // En caso que el valor de luz ambiental sea mayor a 90
+  {
+    mostrarPrimos ? indiceNumeroPrimo++ : numeroEnteroActual++; // Aumentar el contador
+  }  
+  // Fin sensor de luz ambiental
+  ~~~
+
+Explicacion: 
+En el caso de que la luz ambiental tenga un valor de 0, el control 
+de aumentar y disminuir el contador sera manual a travez de los botones asignados a esa tarea.
+
+En el caso de que el la luz ambiental tenga un valor mayor a 65 y menor a 90
+se comenzara a disminuir el contador.
+
+En el caso de que el la luz ambiental tenga un valor mayor 90
+se comenzara a aumentar el contador.
