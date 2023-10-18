@@ -18,8 +18,8 @@ void encenderNumeroNueve(void);
 void encenderNumero(int numero);
 void apagarLeds(void);
 
-int contarNumerosPrimos(int maximo);
-int* obtenerNumerosPrimos(int maximo, int *arraySize);
+int contarNumerosMultiplos(int maximo);
+int* obtenerNumerosMultiplos(int maximo, int *arraySize);
 
 // Defines
 
@@ -42,18 +42,20 @@ int* obtenerNumerosPrimos(int maximo, int *arraySize);
 
 #define PIN_SENSOR A0
 
+#define PIN_SENSOR_AMBIENTAL A1
+
 // Variables
 bool fuePresionado = false;
 int botonPresionado;
 int numeroAMostrar = 0;
 
-// Variables primos
-bool primosContados = false;
-int indiceNumeroPrimo = 0;
-int primosSize = 0;
-int *numerosPrimos;
-int numeroPrimoAMostrar = 0;
-bool mostrarPrimos = false;
+// Variables multiplos de 5
+bool multiplosContados = false;
+int indiceNumeroMultiplo = 0;
+int multiplosSize = 0;
+int *numerosMultiplos;
+int numeroMultiploAMostrar = 0;
+bool mostrarMultiplos = false;
 
 // Variables enteros
 
@@ -68,6 +70,11 @@ IRrecv control(PIN_REMOTO);
 float temperaturaNueva = 0;
 float temperaturaFinal = 0;
 
+// Variables sensor ambiental
+
+float luzNueva = 0;
+float luzFinal = 0;
+
 void setup()
 {
   Serial.begin(9600);
@@ -78,23 +85,28 @@ void setup()
   pinMode(SWITCH, INPUT);
   
   IrReceiver.begin(PIN_REMOTO, DISABLE_LED_FEEDBACK); 
+  
+  pinMode(PIN_SENSOR_AMBIENTAL, INPUT);
 }
 
 void loop()
 {
   temperaturaNueva = (map(analogRead(PIN_SENSOR),0, 1023, -50,450))+1;
-  // Seteo de array con numeros primos
-  if (primosContados == false)
+  luzNueva = analogRead(PIN_SENSOR_AMBIENTAL);
+  luzNueva = luzNueva * 0.0976;
+  
+  // Seteo de array con numeros multiplos
+  if (multiplosContados == false)
   {
-    primosSize = contarNumerosPrimos(99);
-    numerosPrimos = obtenerNumerosPrimos(99,&primosSize);
-    primosContados = true;
+    multiplosSize = contarNumerosMultiplos(99);
+    numerosMultiplos = obtenerNumerosMultiplos(99,&multiplosSize);
+    multiplosContados = true;
   }
-  // Fin seteo de array con numeros primos
+  // Fin seteo de array con numeros multiplos
 
   // Detectar modo Switch
   
-  digitalRead(SWITCH) == LOW ? mostrarPrimos = true : mostrarPrimos = false;
+  digitalRead(SWITCH) == LOW ? mostrarMultiplos = true : mostrarMultiplos = false;
   
   // Fin detectar modo Switch
   
@@ -102,7 +114,7 @@ void loop()
   // Aumentar contador
   if (digitalRead(4) == LOW && fuePresionado == false){
     botonPresionado = 4;
-    mostrarPrimos ? indiceNumeroPrimo++ : numeroEnteroActual++;
+    mostrarMultiplos ? indiceNumeroMultiplo++ : numeroEnteroActual++;
     fuePresionado = true;
   }
   // Fin aumentar contador
@@ -110,7 +122,7 @@ void loop()
   // Reducir contador
   if (digitalRead(2) == LOW && fuePresionado == false){
     botonPresionado = 2;
-    mostrarPrimos ? indiceNumeroPrimo-- : numeroEnteroActual--;
+    mostrarMultiplos ? indiceNumeroMultiplo-- : numeroEnteroActual--;
     fuePresionado = true;
   }
   // Fin reducir contador
@@ -121,10 +133,10 @@ void loop()
     switch (IrReceiver.decodedIRData.decodedRawData)
     {
       case 0xEF10BF00:
-      mostrarPrimos ? indiceNumeroPrimo++ : numeroEnteroActual++;
+      mostrarMultiplos ? indiceNumeroMultiplo++ : numeroEnteroActual++;
       	break;
       case 0xEE11BF00:
-      mostrarPrimos ? indiceNumeroPrimo-- : numeroEnteroActual--;
+      mostrarMultiplos ? indiceNumeroMultiplo-- : numeroEnteroActual--;
       	break;
       
     }
@@ -133,6 +145,20 @@ void loop()
   }
   // Fin control remoto
   
+  // Sensor de luz ambiental
+  
+  if (luzNueva > 65 && luzNueva < 90) 
+  {
+     mostrarMultiplos ? indiceNumeroMultiplo-- : numeroEnteroActual--;
+  }
+  else if(luzNueva > 90)
+  {
+    mostrarMultiplos ? indiceNumeroMultiplo++ : numeroEnteroActual++;
+  }
+    
+  
+  // Fin sensor de luz ambiental
+  
   
   // Cerrar rango
   
@@ -140,9 +166,9 @@ void loop()
   {
     numeroEnteroActual = 0;
   }
-  if (indiceNumeroPrimo > primosSize - 1 || indiceNumeroPrimo < 0)
+  if (indiceNumeroMultiplo > multiplosSize - 1 || indiceNumeroMultiplo < 0)
   {
-    indiceNumeroPrimo = 0;
+    indiceNumeroMultiplo = 0;
   }
   
 
@@ -164,13 +190,13 @@ void loop()
 
   // Calcular primo a mostrar
   
-  numeroPrimoAMostrar = *(numerosPrimos + indiceNumeroPrimo);
+  numeroMultiploAMostrar = *(numerosMultiplos + indiceNumeroMultiplo);
   
   // Encender los 7segmentos
  if (digitalRead(UNIDAD) == LOW)
  {
-   if (mostrarPrimos){
-     numeroAMostrar = numeroPrimoAMostrar % 10;
+   if (mostrarMultiplos){
+     numeroAMostrar = numeroMultiploAMostrar % 10;
    }
    else {
      numeroAMostrar = numeroEnteroActual % 10;
@@ -179,8 +205,8 @@ void loop()
  }
   else
   {
-    if (mostrarPrimos){
-     numeroAMostrar = numeroPrimoAMostrar / 10;
+    if (mostrarMultiplos){
+     numeroAMostrar = numeroMultiploAMostrar / 10;
    }
    else {
      numeroAMostrar = numeroEnteroActual / 10;
@@ -199,13 +225,21 @@ void loop()
   
   // Fin control rebote
 
-  // Mostrar temperatura
+  // Mostrar temperaturas
   if (temperaturaNueva != temperaturaFinal){
     temperaturaFinal = temperaturaNueva;
     Serial.print("La temperatura es de: ");
     Serial.println(temperaturaFinal);
   }
-  // Fin mostrar temperatura
+  // Fin mostrar temperaturas
+  
+  if (luzNueva != luzFinal)
+  {
+    luzFinal = luzNueva;
+    Serial.print("La luz ambiental es de: ");
+    Serial.println(luzNueva);
+  }
+
   delay(10);
 }
  
@@ -344,51 +378,46 @@ void apagarLeds(void)
   	digitalWrite(G, LOW);
 }
 
-// Numeros primos
-int contarNumerosPrimos(int maximo)
+// Numeros Multiplos
+int contarNumerosMultiplos(int maximo)
 {
     int contador = 0;
-    for (int i = 2; i < maximo; i++){
-            bool esPrimo = true;
-            for (int j = 2; j < i; j++)
-            {
-                if (i % j == 0)
-                {
-                    esPrimo = false;
-                    break;
-                }
-            }
-            if(esPrimo)
-            {
-                contador++;
-            }
+    for (int i = 1; i < maximo; i++){
+        bool multiplo = false;
+
+        if(i % 5 == 0)
+        {
+            multiplo = true;
+        }
+
+        if(multiplo)
+        {
+            contador++;
+        }
         }
 
     return contador;
 }
 
-int* obtenerNumerosPrimos(int maximo, int *arraySize)
+int* obtenerNumerosMultiplos(int maximo, int *arraySize)
 {
-    int size = contarNumerosPrimos(maximo);
+    int size = contarNumerosMultiplos(maximo);
     int *array = (int*)calloc(size, sizeof(int));
 
     int arrayIndex = 0;
-    for (int i = 2; i < maximo; i++){
-            bool esPrimo = true;
-            for (int j = 2; j < i; j++)
-            {
-                if (i % j == 0)
-                {
-                    esPrimo = false;
-                    break;
-                }
-            }
-            if(esPrimo)
-            {
-                *(array + arrayIndex) = i;
-                arrayIndex++;
-            }
+    for (int i = 1; i < maximo; i++)
+    {
+        bool multiplo = false;
+        if(i % 5 == 0)
+        {
+            multiplo = true;
         }
+        if(multiplo)
+        {
+            *(array + arrayIndex) = i;
+            arrayIndex++;
+        }
+    }
 
     *arraySize = size;
 

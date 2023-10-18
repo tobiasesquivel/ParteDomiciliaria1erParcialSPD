@@ -61,7 +61,7 @@ void encenderNumero(int numero)
 ~~~
 
 ## Link al proyecto
-- [proyecto](https://www.tinkercad.com/things/1Br1fVLu0Qv-swanky-bruticus/editel?sharecode=QMg_0cW1Uu3E9RxVkFx9nJz79JENm1NEdw5IkpSSxw8)
+- [proyecto](https://www.tinkercad.com/things/fQp0TJIsrR3-copy-of-tobias-esquivel-tercer-parte-primer-parcial/editel?sharecode=MbqTXbX8fXxpuOUObsU5HDWkv8g9skBMmPj2RHbyJSA)
 
 ## Esquema del proyecto
 - [esquema](./Esquema/esquema.png)
@@ -190,3 +190,65 @@ se comenzara a disminuir el contador.
 
 En el caso de que el la luz ambiental tenga un valor mayor 90
 se comenzara a aumentar el contador.
+
+## Modificaciones 4ta parte parcial
+
+Ademas de cambiarles el nombre a las variables correpondientes para que en lugar de hacer referencia
+a los numeros primos lo hagan a los numeros multiplos de 5, cambie el codigo de las funciones
+
+  ~~~ C
+  int contarNumerosMultiplos(int maximo)
+  {
+      int contador = 0;
+      for (int i = 1; i < maximo; i++){
+          bool multiplo = false;
+
+          if(i % 5 == 0)
+          {
+              multiplo = true;
+          }
+
+          if(multiplo)
+          {
+              contador++;
+          }
+          }
+
+      return contador;
+  }
+
+  int* obtenerNumerosMultiplos(int maximo, int *arraySize)
+  {
+      int size = contarNumerosMultiplos(maximo);
+      int *array = (int*)calloc(size, sizeof(int));
+
+      int arrayIndex = 0;
+      for (int i = 1; i < maximo; i++)
+      {
+          bool multiplo = false;
+          if(i % 5 == 0)
+          {
+              multiplo = true;
+          }
+          if(multiplo)
+          {
+              *(array + arrayIndex) = i;
+              arrayIndex++;
+          }
+      }
+
+      *arraySize = size;
+
+      return array;
+  }
+  ~~~
+
+Los cambios son
+En la funcion "contarNumerosMultiplos", ahora recorre
+todos los numeros del 1 hasta el maximo ingresado y si ese numero al 
+sacarle el resultado del modulo de 5, si ese resultado es 0, que quiere decir
+que no hay resto y por lo tanto es divisor, aumenta el contador
+
+En la funcion "obtenerNumerosMultiplos", se aplica la misma logica al momento de guardar
+en las direcciones de memoria asignadas al array y escribe en las mismas sus valores 
+respectivos
